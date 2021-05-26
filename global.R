@@ -1,6 +1,4 @@
 
-#setRepositories(addURLs = c(BioC = "https://bioconductor.org/packages/3.8/bioc"))
-
 library(BiocManager)
 options(repos = BiocManager::repositories())
 library(shinydashboard)
