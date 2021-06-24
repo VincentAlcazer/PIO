@@ -1,6 +1,4 @@
 
-
-
 #' PIO main algorithm: panel finder
 #' Select an optimal set of gene to reach maximum informativity
 #'
