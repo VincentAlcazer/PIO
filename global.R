@@ -36,3 +36,8 @@ custom_theme <- theme_bw() + theme(
 
 
 exon_length <- read_rds("references/2021_04_19_Refseq_GRCH37_stats.rds")
+
+
+#### Run app
+
+run_app <- function(){shiny::runApp()}
