@@ -1,4 +1,5 @@
 
+
 server <- function(input, output) {
 
   ########## ========== DATAFRAME: Loading
@@ -25,6 +26,9 @@ server <- function(input, output) {
         ## Update symbols names
         df$gene_id <- limma::alias2SymbolTable(df$gene_id)
 
+        ## Set a NA character value for missing variant classificaiton
+        df$Variant_Classification[is.na(df$Variant_Classification)] <- "NA"
+        
         if (all(is.na(df$exon_id))) {
           df <- df %>%
             dplyr::select(-exon_id) %>%

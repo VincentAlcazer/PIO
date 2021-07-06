@@ -12,8 +12,9 @@ library(forcats)
 library(ggrepel)
 library(shinyjs)
 library(limma)
-require(AnnotationDbi)
+library(AnnotationDbi)
 library(org.Hs.eg.db)
+
 
 ########## ========== Parameters
 

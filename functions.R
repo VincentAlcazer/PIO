@@ -46,7 +46,7 @@ panel_finder <-
           length = mean(length)
         ) %>%
         filter(unique_pts >= min_pts) %>%
-        mutate(pts_per_kb = round(unique_pts / length, 3)) %>%
+        mutate(pts_per_kb = round(unique_pts * 1000 / length, 4)) %>%
         dplyr::select(metric = all_of(info_metric), everything()) %>%
         arrange(desc(metric))
       
@@ -83,7 +83,7 @@ panel_finder <-
           group_by(mutation_id) %>%
           summarise(unique_pts = length(unique(patient_id)),
                     length = mean(length)) %>%
-          mutate(pts_per_kb = round(unique_pts / length, 3)) %>%
+          mutate(pts_per_kb = round(unique_pts * 1000 / length, 4)) %>%
           dplyr::select(metric = all_of(info_metric), everything()) %>%
           arrange(desc(metric))
         
@@ -114,13 +114,13 @@ panel_finder <-
             .keep_all = T
           ),
           by = c("mutation_id")) %>%
-          mutate(pts_per_kb = round(n_pts / length, 4))
+          mutate(pts_per_kb = round(n_pts * 1000 / length, 4))
         
       } else {
         results_df_list[[datasets]] <- results_df_list[[datasets]] %>%
           left_join(dplyr::select(ordered_mutations, mutation_id, length),
                     by = c("mutation_id")) %>%
-          mutate(pts_per_kb = round(n_pts / length, 4))
+          mutate(pts_per_kb = round(n_pts * 1000 / length, 4))
         
       }
       
@@ -182,7 +182,7 @@ panel_tester <-
             length = mean(length)
           ) %>%
           filter(unique_pts >= min_pts) %>%
-          mutate(pts_per_kb = round(unique_pts / length, 3)) %>%
+          mutate(pts_per_kb = round(unique_pts * 1000 / length, 4)) %>%
           dplyr::select(metric = all_of(info_metric), everything()) %>%
           arrange(desc(metric)) %>%
           distinct(mutation_id) %>% unlist() %>% as.character()
@@ -232,7 +232,7 @@ panel_tester <-
             .keep_all = T
           ),
           by = c("mutation_id")) %>%
-          mutate(pts_per_kb = round(n_pts / length, 4))
+          mutate(pts_per_kb = round(n_pts * 1000 / length, 4))
         
       } else {
         results_df_list[[datasets]] <- results_df_list[[datasets]] %>%
@@ -242,7 +242,7 @@ panel_tester <-
             .keep_all = T
           ),
           by = c("mutation_id")) %>%
-          mutate(pts_per_kb = round(n_pts / length, 4))
+          mutate(pts_per_kb = round(n_pts * 1000 / length, 4))
         
       }
       
