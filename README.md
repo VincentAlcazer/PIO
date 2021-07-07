@@ -15,7 +15,7 @@ PIO has a ready-to-use online version available at
 
 ## Local version
 
-You can install the development version from
+You can install the local development version from
 [GitHub](https://github.com/VincentAlcazer/PIO) either by cloning the
 repository or directly downloading the package in R:
 
@@ -24,18 +24,24 @@ repository or directly downloading the package in R:
 install.packages("remotes")
 remotes::install_github("VincentAlcazer/PIO")
 
-PIO::run_app()
 ```
 
 # Quick tutorial
 
-## Parameters
+## Parameters overview
 
 Parameters can be selected in the left panel.
 
 ### 1. Datasets
 
-Preloaded datasets from 91 independent cohorts spanning 31 different cancer types are available in the base package. A custom mutation dataset can be uploaded by selecting browse and the correct file format. Custom datasets should contain at least the 10 following columns:  "patient_id", "gene_id", "exon_id", "Chromosome", "Start_Position", "End_Position", "Strand", "Variant_Classification", "HGVSp", "cohort".  Column names can differ. Columns can be left empty in case the variable is not available (e.g. for a mutation dataset where exons have not been annotated, exon_id will be an empty column). Example of datasets from cbioportal are provided in the raw_mutation_data folder.
+Preloaded datasets from 91 independent cohorts spanning 31 different cancer types are available in the base package and can be selected. 
+
+A custom mutation dataset can be uploaded by selecting browse and the correct file format. Custom datasets should contain at least the 10 following columns:  "patient_id", "gene_id", "exon_id", "Chromosome", "Start_Position", "End_Position", "Strand", "Variant_Classification", "HGVSp", "cohort".  Column names can differ. Columns can be left empty in case the variable is not available (e.g. for a mutation dataset where exons have not been annotated, exon_id will be an empty column). 
+
+An example dataset is provided (Custom_dataset_example.tsv). Other example of datasets from cbioportal can be found in the raw_mutation_data folder.
+
+Note that preloaded datsets can be merged with custom datasets to enable a global analysis on a larger base (can be done with a local use only).
+
 
 ### 2. Analysis parameters
 
@@ -59,4 +65,54 @@ A minimal number of patients per mutation, calculated on the overall cohort, can
 
 #### Panel upload
 
-For custom analysis: a custom panel should be uploaded. The uploaded file should contain only one column containing the list of gene or exon names.
+For custom analysis: a custom panel should be uploaded. The uploaded file should contain only one column containing the list of gene or exon names. An example is provided (Custom_panel_example.tsv).
+
+
+## Example of application
+
+### Best panel establishment
+
+1. Dataset: select a preloaded or upload a custom dataset
+2. Parameters: PIO optimal
+3. Group mutation by: exon/intron or gene
+4. Informativity metric: UP or UPKB
+
+With these parameters, PIO will selects an optimal set of mutations allowing to maximize informativity in a given disease.
+
+### Custom panel evaluation
+
+1. Dataset: select a preloaded or upload a custom dataset
+2. Parameters: PIO custom (do not forget to upload your custom panel below)
+3. Group mutation by: exon/intron or gene
+4. Informativity metric: UP or UPKB
+
+Using these parameters, PIO will select an optimal set of mutations among the uploaded panel allowing to maximize informativity in a given disease. PIO will automatically suggest the most informative mutations to add to optimize panel informativity.
+
+### Custom panel size optimization
+
+1. Dataset: select a preloaded or upload a custom dataset
+2. Parameters: PIO custom (do not forget to upload your custom panel below)
+3. Group mutation by: exon/intron is recommanded for panel size optimization.
+4. Informativity metric: UPKB is the most adapted metric for panel size optimization.
+
+In this configuration, PIO will propose an optimized panel allowing to maximize informativity with for the minimal size. Different panels can be compared by manually uploading individual panels.
+
+### Comparison of different panel performances
+
+1. Dataset: select a preloaded or upload a custom dataset
+2. Parameters: Panel test (do not forget to upload your custom panel below)
+3. Group mutation by: according to the custom panel: gene or exon/intron
+4. Informativity metric: UP or UPKB
+
+In this configuration, PIO will show the performances of the uploaded panel in a given dataset without further mutation selection/panel optimization.
+
+
+### Mutation exploration
+
+1. Dataset: select a preloaded or upload a custom dataset
+2. Parameters: PIO optimal 
+3. Group mutation by: gene (or exon/intron)
+4. Informativity metric: UP or UPKB
+
+Using these parameters will optimize mutations exploration for a given disease in the mutations tab.
+
