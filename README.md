@@ -24,6 +24,8 @@ repository or directly downloading the package in R:
 install.packages("remotes")
 remotes::install_github("VincentAlcazer/PIO")
 
+shiny::runApp("path_to_PIO")
+
 ```
 
 # Quick tutorial
