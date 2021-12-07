@@ -299,60 +299,36 @@ server <- function(input, output) {
     )
   )
 
-  ### Table des
-  table_des_df <- reactive({
+  ### Clinical impact
+  table_clin_impact_df <- reactive({
     input$run_analysis
     req(input$run_analysis >= 1)
     isolate({
-      mutations <- informative_merged_df() %>%
-        dplyr::select(mutation_id) %>%
-        unlist() %>%
-        as.character()
 
-      df <- mutations_raw_data() %>%
-        dplyr::select(mutation_id = input$mutation_group, everything())
+      gene_list <- unlist(informative_merged_df() %>% dplyr::select(mutation_id)) %>% as.character()
+      gene_list <- intersect(gene_list, clin_impact$gene)
 
-      df$mutation_id[!df$mutation_id %in% mutations] <- NA
+      df <- clin_impact[match(gene_list, clin_impact$gene),]
 
-      df_stat <- df %>%
-        filter(is.na(mutation_id) == F) %>%
-        group_by(patient_id) %>%
-        summarise(n_unique_mut = length(unique(mutation_id))) %>%
-        group_by(n_mutations = n_unique_mut) %>%
-        summarise(exact = n()) %>%
-        arrange(desc(n_mutations)) %>%
-        mutate(at_least = cumsum(exact)) %>%
-        rbind(data.frame(
-          n_mutations = 0,
-          exact = length(setdiff(
-            unique(df$patient_id),
-            unique(df$patient_id[df$mutation_id %in% mutations])
-          )),
-          at_least = length(setdiff(
-            unique(df$patient_id),
-            unique(df$patient_id[df$mutation_id %in% mutations])
-          ))
-        )) %>%
-        arrange((n_mutations))
+      return(df)
 
-      return(df_stat)
     })
   })
 
 
-  output$table_des <- DT::renderDT(
-    table_des_df(), # data
-    class = "display nowrap compact", # style
-    filter = "none", # location of column filters
-    server = T,
-    rownames = FALSE,
-    options = list(
-      scrollX = TRUE,
-      lengthChange = TRUE,
-      sDom = '<"top">lrt<"bottom">ip',
-      columnDefs = list(list(className = "dt-left", targets = "_all"))
-    )
+output$table_clin <- DT::renderDT(
+  table_clin_impact_df(), # data
+  class = "display nowrap compact", # style
+  filter = "none", # location of column filters
+  server = T,
+  rownames = FALSE,
+  options = list(
+    scrollX = TRUE,
+    lengthChange = TRUE,
+    sDom = '<"top">lrt<"bottom">ip',
+    columnDefs = list(list(className = "dt-left", targets = "_all"))
   )
+)
 
 
   ### Individuals datasets

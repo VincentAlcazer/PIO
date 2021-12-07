@@ -239,7 +239,18 @@ ui <- dashboardPage(
                   br(),
                   shinycssloaders::withSpinner(plotOutput("graph_heat"), type = 6)
                 ) # column
+              ),
+              tabPanel(
+                "Clinical impact",
+                column(
+                  12,
+                  h3("Clinical interpretration of Variants"),
+                  p("Data are extracted from CIVIC (https://civicdb.org/home, last accessed 07-12-2021)."),
+                  br(),
+                  shinycssloaders::withSpinner(DT::DTOutput("table_clin"), type = 6)
+                ) # column
               )
+
             ) # tabsetpanel
           ), # tabpanel
           tabPanel(

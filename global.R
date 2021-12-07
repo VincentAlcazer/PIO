@@ -38,7 +38,7 @@ custom_theme <- theme_bw() + theme(
 
 
 exon_length <- read_rds("references/2021_04_19_Refseq_GRCH37_stats.rds")
-
+clin_impact <- read_rds("references/2021_12_07_CIVIC_clinical_evidences.rds")
 
 #### Run app
 

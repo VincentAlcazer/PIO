@@ -1,8 +1,17 @@
 
 
+ref <- temp %>%
+  dplyr::select(gene,entrez_id, variant, disease,drugs, evidence_type, evidence_direction,
+         evidence_level, clinical_significance, evidence_statement, citation,
+         chromosome, start, stop, representative_transcript, reference_build)
+
+saveRDS(ref, "references/2021_12_07_CIVIC_clinical_evidences.rds")
+
+clin_impact <- read_rds("references/2021_12_07_CIVIC_clinical_evidences.rds")
+
 ## parameters
 input <- data.frame(
-  disease = "BLCA",
+  disease = "AML",
   mutation_group = "gene_id",
   metric_type = "UPKB",
   min_pts = 2,
@@ -42,6 +51,7 @@ informative_merged_df <- panel_finder(split_dataset,
              custom_panel = NULL
 )
 
+
 custom_panel <- read_tsv("Custom_dataset_example_optimized.tsv") %>% unlist() %>% as.character()
 
 ## Add the number of independent datasets
@@ -56,8 +66,20 @@ informative_merged_df <- informative_merged_df %>%
 
 
 
+table_clin_impact_df <- reactive({
+  input$run_analysis
+  req(input$run_analysis >= 1)
+  isolate({
+
+    gene_list <- unlist(panel_df() %>% dplyr::select(mutation_id)) %>% as.character()
+    gene_list <- intersect(gene_list, clin_impact$gene)
+
+   df <- clin_impact[match(gene_list, clin_impact$gene),]
 
 
+    return(df)
+  })
+})
 
 
 
