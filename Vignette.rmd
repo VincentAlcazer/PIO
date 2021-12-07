@@ -185,6 +185,10 @@ Several additional statistics can be found in the "mutation" module.
 
 In this situation, we will first use PIO in custom mode to evaluate the performances of our local panel. PIO will automatically proposes the most informative genomic intervals not included in the custom panel to add.
 
+## PIO panel tester mode
+
+In this mode, PIO will test the exact provided without further selection. By default, mutations are ranked according to the selected informativity metric and mutation order is defined using PIO main algorithm approach. The original mutation order can be kept as is in the local version of PIO (keep_order = T).
+
 ## Custom panel format
 
 The custom panel must be uploaded as a simple file with a unique column containing all the mutations names (either gene or exon/intron). The file can be a tab-delimited file (.txt or .tsv) or a csv file. Once uploaded, PIO will automatically find the corresponding genomic intervals according to the NCBI Reference Sequence Database (RefSeq).
@@ -258,4 +262,38 @@ knitr::include_graphics("vignette/2CUSTOM_opti_50_overall_graph.PNG")
 ```
 
 
-Our limited version of the incremented custom panel catches 58% of DLBCL patients with at least 3 mutations, and 95% with at least 1 mutation.
+Our limited version (~50kB) of the incremented custom panel catches 58% of DLBCL patients with at least 3 mutations, and 95% with at least 1 mutation.
+
+
+<br>
+<br>
+
+
+# Panel benchmarking
+
+
+*Practical example: I have 4 different commercial panels: which one is better to reach an optimal informativity, targeting 3 different mutations per patient?*
+
+In this situation, we will use PIO in panel tester mode to compare the performances of these 4 panels. The panels are myeloid cancer panels retrieved from Levine et al. Haematologica 2019.
+
+## Custom panel format
+
+The custom panel must be uploaded as a simple file with a unique column containing all the mutations names (either gene or exon/intron). The file can be a tab-delimited file (.txt or .tsv) or a csv file. Once uploaded, PIO will automatically find the corresponding genomic intervals according to the NCBI Reference Sequence Database (RefSeq).
+
+
+## Analysis parameters & run
+
+After having loaded the panel, we select the following parameters:
+
+1. Preloaded datasets:  AML 
+2. Analysis mode: Panel test
+3. Group mutations by: Gene (The correct format must be selected according to the loaded panel)
+4. Informativity metric: UP
+5. Min. patients/mutations: 2
+6. Min. mutations/patient: 3
+
+
+```{r Benchmark, out.width=800}
+knitr::include_graphics("vignette/3_benchmark.jpg")
+```
+
