@@ -28,7 +28,7 @@ server <- function(input, output) {
 
         ## Set a NA character value for missing variant classificaiton
         df$Variant_Classification[is.na(df$Variant_Classification)] <- "NA"
-        
+
         if (all(is.na(df$exon_id))) {
           df <- df %>%
             dplyr::select(-exon_id) %>%
@@ -74,7 +74,9 @@ server <- function(input, output) {
       df <- data.table::fread(input$panel_list$datapath, sep = input$sep) %>% as.data.frame()
       colnames(df)[1] <- "mutation_id"
 
-      return(df)
+        return(df)
+
+
     })
   })
 
@@ -103,7 +105,7 @@ server <- function(input, output) {
       } else {
         df <- panel_finder(merged_dataset,
           group_by = input$mutation_group,
-          info_metric = input$metric_type, min_pts = input$min_pts,
+          info_metric = input$metric_type, min_pts = input$min_pts,min_mut = input$min_mut,
           custom_panel = custom_panel
         )
       }
@@ -119,9 +121,29 @@ server <- function(input, output) {
         left_join(independent_sets, by = "mutation_id") %>%
         droplevels()
 
+
+      ## Filter panel for at least n mutations per patient
+
+
       return(df)
     }) # isolate
   })
+
+  output$main_panel <- DT::renderDT(
+
+    informative_merged_df() %>% filter(cum_length <= input$max_length*1000), # data
+    class = "display nowrap compact", # style
+    filter = "none", # location of column filters
+    server = T,
+    rownames = FALSE,
+    options = list(
+      scrollX = TRUE,
+      lengthChange = TRUE,
+      sDom = '<"top">lrt<"bottom">ip',
+      columnDefs = list(list(className = "dt-left", targets = "_all"))
+    )
+  )
+
 
   ### Table: suggested genes to reach full informativity
 
@@ -130,7 +152,7 @@ server <- function(input, output) {
     req(input$run_analysis >= 1)
 
     isolate({
-      if (input$analysis_type == "optimal" | max(informative_merged_df() %>% dplyr::select(percent_tot)) >= 99.9) {
+      if (input$analysis_type == "optimal" | max(informative_merged_df() %>% dplyr::select(percent_comut_1)) >= 99.9) {
         NULL
       } else {
         optimal_panel <- informative_merged_df() %>%
@@ -149,25 +171,15 @@ server <- function(input, output) {
         new_data_list <- list(merged = (mutations_raw_data() %>%
           filter(!patient_id %in% diag_pts)))
 
-        # if(is.null(input$panel_list) | input$analysis_type == "optimal"){
-        #   custom_panel = NULL
-        # } else {
-        #   custom_panel <- unlist(panel_df() %>% dplyr::select(mutation_id)) %>% as.character()
-        # }
-        #
-
-
         df <- panel_finder(new_data_list,
           group_by = input$mutation_group,
-          info_metric = input$metric_type, min_pts = input$min_pts,
+          info_metric = input$metric_type, min_pts = input$min_pts,min_mut = input$min_mut,
           custom_panel = NULL
         ) %>%
           mutate(
-            percent_remaining = round(percent_tot, 2),
-            percent_tot = round(n_pts / tot_pts, 3)
-          ) %>%
-          dplyr::select(mutation_id, n_pts, cum_sum, percent_remaining, percent_tot, everything())
-
+            percent_remaining = round(percent_comut_1, 2),
+            percent_tot = round(n_comut_1 / tot_pts, 3)
+          )
 
         return(df)
       }
@@ -372,7 +384,7 @@ server <- function(input, output) {
         } else {
           df <- panel_finder(dataset_list,
             group_by = input$mutation_group,
-            info_metric = input$metric_type, min_pts = input$min_pts,
+            info_metric = input$metric_type, min_pts = input$min_pts,min_mut = input$min_mut,
             custom_panel = custom_panel
           )
         }
@@ -385,6 +397,20 @@ server <- function(input, output) {
     }) # isolate
   })
 
+  output$indiv_panel <- DT::renderDT(
+
+    informative_df() %>% filter(cum_length <= input$max_length*1000), # data
+    class = "display nowrap compact", # style
+    filter = "none", # location of column filters
+    server = T,
+    rownames = FALSE,
+    options = list(
+      scrollX = TRUE,
+      lengthChange = TRUE,
+      sDom = '<"top">lrt<"bottom">ip',
+      columnDefs = list(list(className = "dt-left", targets = "_all"))
+    )
+  )
 
   ########## ========== Mutations frequencies & heat data
 
@@ -504,10 +530,10 @@ server <- function(input, output) {
 
       base_pts <- panel_tester(data_list,
         group_by = input$mutation_group,
-        info_metric = "unique_pts", min_pts = input$min_pts,
+        info_metric = "UP", min_pts = input$min_pts,
         custom_panel = top_genes
       ) %>%
-        mutate(cum_length = cumsum(length), group = "unique_pts") %>%
+        mutate(cum_length = cumsum(length), group = "UP") %>%
         filter(cum_length <= 1000 * input$max_length)
 
 
@@ -523,36 +549,37 @@ server <- function(input, output) {
 
       base_pts_kb <- panel_tester(data_list,
         group_by = input$mutation_group,
-        info_metric = "pts_per_kb", min_pts = input$min_pts,
+        info_metric = "UPKB", min_pts = input$min_pts,
         custom_panel = top_genes
       ) %>%
-        mutate(cum_length = cumsum(length), group = "pts_per_kb") %>%
+        mutate(cum_length = cumsum(length), group = "UPKB") %>%
         filter(cum_length <= 1000 * input$max_length)
 
       ### PIO: n pts
       PIO_pts <- panel_finder(data_list,
         group_by = input$mutation_group,
-        info_metric = "unique_pts", min_pts = input$min_pts,
+        info_metric = "UP", min_pts = input$min_pts,
+        min_mut = input$min_mut,
         custom_panel = NULL
       ) %>%
-        mutate(cum_length = cumsum(length), group = "PIO_unique_pts") %>%
+        mutate(cum_length = cumsum(length), group = "PIO_UP") %>%
         filter(cum_length <= 1000 * input$max_length)
 
 
       ### PIO: pts per kb
       PIO_pts_per_kb <- panel_finder(data_list,
         group_by = input$mutation_group,
-        info_metric = "pts_per_kb", min_pts = input$min_pts,
+        info_metric = "UPKB", min_pts = input$min_pts,min_mut = input$min_mut,
         custom_panel = NULL
       ) %>%
-        mutate(cum_length = cumsum(length), group = "PIO_pts_per_kb") %>%
+        mutate(cum_length = cumsum(length), group = "PIO_UPKB") %>%
         filter(cum_length <= 1000 * input$max_length)
 
 
       df <- rbind(base_pts, base_pts_kb, PIO_pts, PIO_pts_per_kb) %>%
         mutate(group = factor(group, levels = c(
-          "unique_pts", "pts_per_kb",
-          "PIO_unique_pts", "PIO_pts_per_kb"
+          "UP", "UPKB",
+          "PIO_UP", "PIO_UPKB"
         )))
 
       return(df)
@@ -563,24 +590,7 @@ server <- function(input, output) {
 
   ### === Custom graph parameters
 
-  graph_height <- reactive({
-    input$run_analysis
-    req(input$run_analysis >= 1)
-    isolate({
-      n_cohorts <- length(unique(informative_df() %>% dplyr::select(cohort) %>% unlist()))
-
-      if (n_cohorts <= 2) {
-        height <- 400
-      } else if (n_cohorts <= 4) {
-        height <- 800
-      } else {
-        height <- 1200
-      }
-      return(height)
-    })
-  })
-
-  graph_height_2 <- reactive({
+ graph_height_2 <- reactive({
     input$run_analysis
     req(input$run_analysis >= 1)
     isolate({
@@ -606,172 +616,157 @@ server <- function(input, output) {
       req(input$run_analysis >= 1)
 
       isolate({
-        plot_genes <- unique(informative_merged_df() %>% dplyr::select(mutation_id) %>% unlist())
-
-        if (length(plot_genes) > input$max_genes) {
-          plot_genes <- plot_genes[1:input$max_genes]
-        }
-
 
         data_plot <- informative_merged_df() %>%
           filter(
-            percent_tot <= input$max_freq,
-            mutation_id %in% plot_genes
+            percent_comut_1 <= input$max_freq,
+            cum_length <= input$max_length*1000
           ) %>%
-          droplevels()
+          droplevels() %>%
+          pivot_longer(starts_with("percent_comut"), names_to = "p_comut_cat", values_to ="p_comut_val")
 
-
-
-        data_anno <- data.frame(
-          x = nth(data_plot$mutation_id, 0.85 * length(data_plot$mutation_id)),
-          y = 0.3,
-          tot_pts = paste0(
-            round(max(data_plot %>% dplyr::select(percent_tot)) * 100, 2), "% pts diagnosed \n with ",
-            length(unique(data_plot %>% dplyr::select(mutation_id) %>% unlist())), " ",
-            if_else(input$mutation_group == "gene_id", "genes", "exons/introns")
-          )
-        )
-
+        data_plot$p_comut_cat <- factor(data_plot$p_comut_cat,
+                                        labels = c(">=1",">=2",">=3",">=4",">=5"))
 
         n_pts <- mutations_raw_data() %>%
           distinct(patient_id) %>%
           unlist() %>%
           length()
 
+        data_anno <- data_plot %>%
+          group_by(p_comut_cat) %>%
+          summarise(y = round(max(p_comut_val),2),
+                    n_pts = round(max(p_comut_val) * n_pts),
+                    x = max(cum_length)/1000) %>%
+          mutate(diff = (y - lead(y))/2) %>%
+          mutate(y_pos = if_else(p_comut_cat == ">=5", y/2, y-diff))
 
-        #  test <- panel_data_merged %>% filter(Disease == "AML")
-
-        data_length <- data_plot %>%
-          mutate(panel_length = cumsum(length)) %>%
-          mutate(percent_length = panel_length / max(panel_length))
-
-        ggplot(data = data_plot, aes(
-          x = forcats::fct_reorder(mutation_id, percent_tot),
-          y = percent_tot, group = 1
-        )) +
-          geom_point(aes(color = as.factor(n_cohort))) +
-          geom_line(aes(color = as.factor(n_cohort))) +
-          scale_color_viridis_d() +
-          geom_line(
-            data = filter(data_length, mutation_id %in% plot_genes),
-            aes(
-              x = forcats::fct_reorder(mutation_id, percent_tot),
-              y = percent_length, group = 1
-            ), color = "red"
-          ) +
-          geom_text_repel(data = data_anno, aes(x = x, y = y, label = tot_pts), size = 6) +
+        ggplot(data = data_plot) +
+          geom_line(aes(x = cum_length / 1000, y = p_comut_val,
+                        color = p_comut_cat, group = p_comut_cat),
+                    size = 1.2) +
+          geom_text(data = data_anno,
+                          aes(x = x, y = y_pos, label = paste0(y*100,"%"), color = p_comut_cat),
+                          size = 6) +
           custom_theme +
           labs(
             title = paste0(
               "Most informative genes in ", if_else(is.null(input$custom_data), input$disease, "Custom dataset"),
               " (n= ", n_pts, " pts)"
             ),
-            x = "", group = "test",
-            color = "Cohorts (n)", caption = "Cumulated % of total panel exonic length"
+            x = "Panel size (kb)", group = "test", y = "Total patients (%)",
+            color = "Mutations", fill = "Mutations"
           ) +
           ylim(0, 1) +
+          scale_fill_viridis_d() +
+          scale_color_viridis_d() +
           theme(
+            legend.position = "right",
             axis.text.x = element_text(
-              angle = 90, vjust = 0.5, hjust = 1, face = "bold",
-              size = input$x_size
+              size = input$x_size, face = "bold"
             ),
-            plot.caption = element_text(color = "red", size = 10),
-            legend.position = "right"
+            axis.text.y = element_text(
+              size = input$x_size, face = "bold"
+            )
           )
+
+
+
       })
-    },
-    height = 400
+    }
   )
 
-  output$graph_informative <- renderPlot(
-    {
-      input$run_analysis
-      input$apply_param
-      req(input$run_analysis >= 1)
-      isolate({
-        plot_list <- list()
+  graph_informative <- reactive({
+    output$graph_informative <- renderPlot(
+      {
+        input$run_analysis
+        input$apply_param
+        req(input$run_analysis >= 1)
+        isolate({
+          plot_list <- list()
 
-        for (study in unique(informative_df() %>% dplyr::select(cohort) %>% unlist())) {
-          data_plot <- informative_df() %>%
-            filter(cohort == study) %>%
-            droplevels()
+          for (study in unique(informative_df() %>% dplyr::select(cohort) %>% unlist())) {
+            data_plot <- informative_df() %>%
+              filter(cohort == study) %>%
+              droplevels()
 
-          plot_genes <- unique(data_plot %>% dplyr::select(mutation_id) %>% unlist())
+            data_plot <- data_plot %>%
+              filter(
+                percent_comut_1 <= input$max_freq
+              ) %>%
+              droplevels() %>%
+              pivot_longer(starts_with("percent_comut"), names_to = "p_comut_cat", values_to ="p_comut_val")
 
-          if (length(plot_genes) > input$max_genes) {
-            plot_genes <- plot_genes[1:input$max_genes]
+            data_plot$p_comut_cat <- factor(data_plot$p_comut_cat,
+                                            labels = c(">=1",">=2",">=3",">=4",">=5"))
+
+            n_pts <- mutations_raw_data() %>%
+              filter(cohort == study) %>%
+              distinct(patient_id) %>%
+              unlist() %>%
+              length()
+
+            data_anno <- data_plot %>%
+              group_by(p_comut_cat) %>%
+              summarise(y = round(max(p_comut_val),2),
+                        n_pts = round(max(p_comut_val) * n_pts),
+                        x = max(cum_length)/1000) %>%
+              mutate(diff = (y - lead(y))/2) %>%
+              mutate(y_pos = if_else(p_comut_cat == ">=5", y/2, y-diff))
+
+
+
+            plot_list[[study]] <- ggplot(data = data_plot) +
+              geom_line(aes(x = cum_length / 1000, y = p_comut_val,
+                            color = p_comut_cat, group = p_comut_cat),
+                        size = 1.2) +
+              geom_text_repel(data = data_anno,
+                              aes(x = x, y = y_pos, label = paste0(y*100,"%"), color = p_comut_cat),
+                              size = 6) +
+              custom_theme +
+              labs(
+                title = paste0(
+                  study,
+                  " (n= ", n_pts, " pts)"
+                ),
+                x = "", group = "test", y = "Total patients (%)",
+                color = "Mutations", fill = "Mutations"
+              ) +
+              ylim(0, 1) +
+              scale_fill_viridis_d() +
+              scale_color_viridis_d() +
+              theme(
+                legend.position = "right",
+                axis.text.x = element_text(
+                  size = input$x_size, face = "bold"
+                ),
+                axis.text.y = element_text(
+                  size = input$x_size, face = "bold"
+                )
+              )
           }
 
-          data_plot <- data_plot %>%
-            filter(
-              percent_tot <= input$max_freq,
-              mutation_id %in% plot_genes
-            ) %>%
-            droplevels()
+          gridExtra::grid.arrange(grobs = plot_list, ncol = 2)
+        }) # Isolate
+      }
+    )
 
+    n_cohorts <- length(unique(informative_df() %>% dplyr::select(cohort) %>% unlist()))
 
-          data_anno <- data.frame(
-            x = nth(data_plot$mutation_id, 0.85 * length(data_plot$mutation_id)),
-            y = 0.3,
-            tot_pts = paste0(
-              round(max(data_plot %>% dplyr::select(percent_tot)) * 100, 2), "% pts diagnosed \n with ",
-              length(unique(data_plot %>% dplyr::select(mutation_id) %>% unlist())),
-              if_else(input$mutation_group == "gene_id", " genes", " exons/introns")
-            )
-          )
+    if (n_cohorts <= 2) {
+      plotOutput('graph_informative', height = 400)
+    } else if (n_cohorts <= 4) {
+      plotOutput('graph_informative', height = 800)
+    } else {
+      plotOutput('graph_informative', height = 1200)
+    }
 
+  })
+  output$graph_informativeUI <- renderUI({
+    graph_informative()
+  })
 
-          n_pts <- mutations_raw_data() %>%
-            filter(cohort == study) %>%
-            distinct(patient_id) %>%
-            unlist() %>%
-            length()
-
-
-          #  test <- panel_data_merged %>% filter(Disease == "AML")
-
-          data_length <- data_plot %>%
-            mutate(panel_length = cumsum(length)) %>%
-            mutate(percent_length = panel_length / max(panel_length))
-
-
-
-          plot_list[[study]] <- ggplot(data = data_plot, aes(
-            x = forcats::fct_reorder(mutation_id, percent_tot),
-            y = percent_tot, group = 1
-          )) +
-            geom_point() +
-            geom_line() +
-            scale_color_viridis_d() +
-            geom_line(
-              data = filter(data_length, mutation_id %in% plot_genes),
-              aes(
-                x = forcats::fct_reorder(mutation_id, percent_tot),
-                y = percent_length, group = 1
-              ), color = "red"
-            ) +
-            geom_text_repel(data = data_anno, aes(x = x, y = y, label = tot_pts), size = 6) +
-            custom_theme +
-            labs(
-              title = paste0(study, " (n= ", n_pts, " pts)"),
-              color = "Cohorts (n)", x = ""
-            ) +
-            ylim(0, 1) +
-            theme(
-              axis.text.x = element_text(
-                angle = 90, vjust = 0.5, hjust = 1, face = "bold",
-                size = input$x_size
-              ),
-              plot.caption = element_text(color = "red", size = 10),
-              legend.position = "none"
-            )
-        }
-
-        gridExtra::grid.arrange(grobs = plot_list, ncol = 2)
-      }) # Isolate
-    },
-    height = graph_height
-  ) # Renderplot
+  # Renderplot
 
 
   ### === Mutations frequencies
@@ -814,7 +809,7 @@ server <- function(input, output) {
           labs(
             title = paste0(
               "Most frequent mutations in ", title,
-              " (n= ", sum(informative_merged_df() %>% dplyr::select(n_pts)), " pts)"
+              " (n= ", unique(mutation_des_merged_df() %>% dplyr::select(n_pts)), " pts)"
             ),
             y = "Percent patients", x = "",
             fill = "Mutation type"
@@ -889,7 +884,7 @@ server <- function(input, output) {
         length()
 
       graph_length_df() %>%
-        ggplot(aes(x = cum_length / 1000, y = percent_tot, color = group)) +
+        ggplot(aes(x = cum_length / 1000, y = percent_comut_1, color = group)) +
         # geom_point() +
         geom_line(size = 1.5) +
         scale_color_viridis_d() +

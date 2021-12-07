@@ -5,6 +5,7 @@ library(BiocManager)
 options(repos = BiocManager::repositories())
 library(shinydashboard)
 library(dplyr)
+library(tidyr)
 library(readr)
 library(ggplot2)
 library(viridis)
@@ -16,6 +17,7 @@ library(shinyjs)
 library(limma)
 library(AnnotationDbi)
 library(org.Hs.eg.db)
+library(shinycssloaders)
 
 
 ########## ========== Parameters

@@ -1,6 +1,6 @@
 
 ui <- dashboardPage(
-  dashboardHeader(title = "PIO v1.0"),
+  dashboardHeader(title = "PIO v1.1"),
   dashboardSidebar(
     sidebarMenu(
       id = "tabs",
@@ -59,14 +59,19 @@ ui <- dashboardPage(
       radioButtons("metric_type",
         label = "Informativity metric",
         choices = c(
-          "Unique patients (UP)" = "unique_pts",
-          "Unique patients / kb (UPKB)" = "pts_per_kb"
-        ), selected = "unique_pts"
+          "Unique patients (UP)" = "UP",
+          "Unique patients / kb (UPKB)" = "UPKB"
+        ), selected = "UPKB"
       ),
       div(style = "margin-top: -20px"),
       numericInput("min_pts",
-        label = "Min. patients / mutation",
+        label = "Min. pts / mutation",
         value = 2, min = 1
+      ),
+      div(style = "margin-top: -20px"),
+      numericInput("min_mut",
+                   label = "Targeted n. mutations / pts ",
+                   value = 1, min = 1, max = 5
       ),
 
       # div(style = "margin-top: -25px"),
@@ -97,7 +102,7 @@ ui <- dashboardPage(
   dashboardBody(
     fluidPage(
       useShinyjs(),
-      h2("Panel Informativity Optimizer v1.0"),
+      h2("Panel Informativity Optimizer v1.1"),
       column(
         9,
         tabsetPanel(
@@ -107,29 +112,39 @@ ui <- dashboardPage(
             h3("Methods"),
             column(
               12,
-              p("The optimal set of mutated genes for disease diagnosis is proposed as follow:
-                                 The most frequent mutation in the given cohort is first selected.
-                                 Patients presenting this mutation are removed from the cohort, and
-                                 the most frequent mutation in the remaining patients is then selected.
-                                 The process is reiterated untill no more patients are added or the total number
-                                 of patients in the cohort is reached.
-                                 The cumulative percentage of diagnosed patient is then represented
-                                 on yellow/blue color scale, according to the number of independent cohorts
-                                 the gene was found mutated in.
-                                 The cumulative exonic length of the panel
-                                 (total exonic length for genes analysis, exonic length for exons)
-                                 is represented in red as a percent of the total panel length.
-
-
-                                   ")
+              p("The mutation reaching the maximum selected metric in the given cohort is first selected.
+                 Patients presenting this mutation are removed from the cohort, and
+                 the mutation reaching the maximum selected metric in the remaining patients is then selected.
+                 The process is reiterated untill no more patients are added or the total number
+                  of patients in the cohort is reached.
+                "),
+              HTML("<b>/!\\ Processing time is directly related to the total number of mutations & patients (~3minutes for 5000 pts from the BRCA merged dataset) /!\\</b>")
             ),
-            h3("Merged cohort analysis"),
+            tabsetPanel(
+              id = "cohorts", type = "tabs",
+              tabPanel(
+                "Merged cohort",
+            h3("Overall graph"),
+            column(
+              12,
+              shinycssloaders::withSpinner(plotOutput("graph_informative_merged", height = 600), type = 6),
+              br()
+            ),
+            h3("Main panel"),
             column(
               12,
               downloadButton("download_panel", "Download merged cohort table (.tsv)"),
-              shinycssloaders::withSpinner(plotOutput("graph_informative_merged"), type = 6)
+              DT::DTOutput("main_panel"),
+              HTML("<i> <b>UP:</b> Unique patients in the overall cohort;
+              <b>UPKB:</b> Unique patients per kilobase in the overall cohort;
+              <b>step_UP:</b> Unique patients added in the remaining cohort from the corresponding algorithm step;
+              <b>step_UP_comut:</b> Additional patients with comutation added in the corresponding algorithm step;
+              <b>step_UPKB:</b> Unique patients per kilobase metric in the remaining cohort from corresponding algorithm step;
+                   </i>"),
+              br()
             ),
-            br(),
+
+
             h3("Suggested genes to add"),
             column(
               12,
@@ -138,13 +153,37 @@ ui <- dashboardPage(
               DT::DTOutput("sug_genes")
             ),
             br(),
-            h3("Individual cohort analysis"),
-            column(
-              12,
-              br(),
-              downloadButton("download_panel_indiv", "Download individual cohorts table (.tsv)"),
-              shinycssloaders::withSpinner(plotOutput("graph_informative"), type = 6),
+              ),
+            tabPanel(
+              "Individual cohort",
+
+                h3("Individual cohort analysis"),
+                column(
+                  12,
+                  br(),
+                  shinycssloaders::withSpinner(uiOutput("graph_informativeUI"), type = 6)
+                  #shinycssloaders::withSpinner(plotOutput("graph_informative"), type = 6)
+
+                ),
+                column(
+                  12,
+                  br(),
+
+                  h3("Individual panels"),
+                  downloadButton("download_panel_indiv", "Download individual cohorts table (.tsv)"),
+                  DT::DTOutput("indiv_panel"),
+                  HTML("<i> <b>UP:</b> Unique patients in the overall cohort;
+              <b>UPKB:</b> Unique patients per kilobase in the overall cohort;
+              <b>step_UP:</b> Unique patients added in the remaining cohort from the corresponding algorithm step;
+              <b>step_UP_comut:</b> Additional patients with comutation added in the corresponding algorithm step;
+              <b>step_UPKB:</b> Unique patients per kilobase metric in the remaining cohort from corresponding algorithm step;
+                   </i>"),
+                  br()
+
+                )
             )
+            )
+
           ), # tabpanel
           tabPanel(
             "Mutations",
@@ -215,10 +254,11 @@ ui <- dashboardPage(
                                    linearly added to the panel untill reaching the size limit, and
                                    two approaches using PIO algorithm with the corresponding metrics.
                                     "),
-              numericInput("max_length",
-                label = "Max panel length (kb)",
-                min = 1, value = 1000
-              ), actionButton("run_length_analysis", "Run length analysis"),
+              # numericInput("max_length",
+              #   label = "Max panel length (kb)",
+              #   min = 1, value = 1000
+              # ),
+              actionButton("run_length_analysis", "Run length analysis"),
               downloadButton("download_length", "Download full table (.tsv)"),
               shinycssloaders::withSpinner(plotOutput("graph_length"), type = 6)
             ) # column
@@ -230,12 +270,9 @@ ui <- dashboardPage(
         wellPanel(
           h4("Graph Parameters"),
           numericInput("max_freq", label = "Max frequency", value = 1, min = 0, max = 1),
-          numericInput("max_genes", label = "Max genes/exons", value = 100, min = 1),
-          sliderInput("x_size", label = "Genes/Exons fontsize", value = 12, min = 1, max = 30),
-          # radioButtons("freq_type", label="Frequencies:",
-          #              choices = c("Count"="cum_sum",
-          #                          "Percent"="percent_tot"),
-          #              selected = "cum_sum"),
+          numericInput("max_length", label = "Max panel length (kb)", value = 10000),
+          sliderInput("x_size", label = "X/Y axis fontsize", value = 12, min = 1, max = 30),
+          numericInput("max_genes", label = "Max genes to plot (mutations module)", value = 100, min = 1),
           actionButton("apply_param", "Apply")
         )
       ) # column

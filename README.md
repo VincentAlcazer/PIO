@@ -17,7 +17,8 @@ PIO has a ready-to-use online version available at
 
 You can install the local development version from
 [GitHub](https://github.com/VincentAlcazer/PIO) either by cloning the
-repository or directly downloading the package in R:
+repository or directly downloading the package in R. Note that dependencies will have to be installed first 
+in case of repository cloning.
 
 ``` r
 
@@ -36,13 +37,15 @@ Parameters can be selected in the left panel.
 
 ### 1. Datasets
 
-Preloaded datasets from 91 independent cohorts spanning 31 different cancer types are available in the base package and can be selected. 
+The training dataset can be selected here.
 
-A custom mutation dataset can be uploaded by selecting browse and the correct file format. Custom datasets should contain at least the 10 following columns:  "patient_id", "gene_id", "exon_id", "Chromosome", "Start_Position", "End_Position", "Strand", "Variant_Classification", "HGVSp", "cohort".  Column names can differ. Columns can be left empty in case the variable is not available (e.g. for a mutation dataset where exons have not been annotated, exon_id will be an empty column). 
+- **Preloaded datasets**: Here you can select mutation data from 91 independent cohorts spanning 31 different cancer types. Data sources are available in the PIO paper.
+
+- **Custom datasets**: Custom mutation data can be uploaded by selecting browse and the correct file format. Custom datasets should contain at least the 10 following columns: "patient_id", "gene_id", "exon_id", "Chromosome", "Start_Position", "End_Position", "Strand", "Variant_Classification", "HGVSp", "cohort". Column names can differ but should be in the exact same position. Columns can be left empty in case the variable is not available (e.g. for a mutation dataset where exons have not been annotated, exon_id will be an empty column).
 
 An example dataset is provided (Custom_dataset_example.tsv). Other example of datasets from cbioportal can be found in the raw_mutation_data folder.
 
-Note that preloaded datsets can be merged with custom datasets to enable a global analysis on a larger base (can be done with a local use only).
+Note that preloaded datasets can be merged with custom datasets to enable a global analysis on a larger base (can be done with a local use only).
 
 
 ### 2. Analysis parameters
