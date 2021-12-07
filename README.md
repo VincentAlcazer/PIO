@@ -31,6 +31,8 @@ shiny::runApp("path_to_PIO")
 
 # Quick tutorial
 
+For a complete tutorial, please download the [vignette.](https://github.com/VincentAlcazer/PIO/blob/main/Vignette.html)
+
 ## Parameters overview
 
 Parameters can be selected in the left panel.
@@ -52,28 +54,31 @@ Note that preloaded datasets can be merged with custom datasets to enable a glob
 
 #### Analysis mode
 
-For the optimal panel selection (optimal mode), the most informative gene on the overall cohort is first selected. Patients presenting this mutation are then removed from the cohort, and the most informative gene in the remaining cohort is then selected. The algorithm reiterates until all patients are removed or no patients are added. 
-
-For the custom panel interrogation (custom mode), only genes/exons from the provided list of genomic intervals are considered. An additional list of genes/exons, established by running the algorithm on the patients without mutation on the proposed genomic intervals is provided to complete the panel if all patients are not diagnosed with the custom panel.
+Optimal panel selection (optimal mode), custom panel interrogation (custom mode) or panel test. See the vignette for more informations about the mods.
 
 #### Group mutations by
 
-Should mutations (and their respective length) be grouped by gene or exon/intron?
+Should mutations (and their respective length) be grouped by gene or exon/intron?  (default: gene)
 
 #### Informativity metric
 
-The number of unique patients per kilobase (UPKB) or the number of unique patients (UP) can be used as informativity metric. 
+The number of unique patients per kilobase (UPKB) or the number of unique patients (UP) can be used as informativity metric.  (default: UPKB)
 
 #### Min patients/mutation
 
-A minimal number of patients per mutation, calculated on the overall cohort, can be set in order to avoid overfitting to private mutations. 
+A minimal number of patients per mutation, calculated on the overall cohort, can be set in order to avoid overfitting to private mutations. (default: 2)
+
+
+### Min. mutations/patient
+
+How many mutations per patient you would like PIO to aim at. (default: 2)
 
 #### Panel upload
 
 For custom analysis: a custom panel should be uploaded. The uploaded file should contain only one column containing the list of gene or exon names. An example is provided (Custom_panel_example.tsv).
 
 
-## Example of application
+## Proposed parameters according to applications
 
 ### Best panel establishment
 
@@ -81,8 +86,10 @@ For custom analysis: a custom panel should be uploaded. The uploaded file should
 2. Parameters: PIO optimal
 3. Group mutation by: exon/intron or gene
 4. Informativity metric: UP or UPKB
+5. Min. patients/mutations: at least 2
+6. Min. mutations/patient: between 1 and 5
 
-With these parameters, PIO will selects an optimal set of mutations allowing to maximize informativity in a given disease.
+With these parameters, PIO will selects an optimal set of mutations allowing to maximize informativity in a given disease, targeting a selected number of mutations per patient (informativity level).
 
 ### Custom panel evaluation
 
@@ -90,6 +97,8 @@ With these parameters, PIO will selects an optimal set of mutations allowing to 
 2. Parameters: PIO custom (do not forget to upload your custom panel below)
 3. Group mutation by: exon/intron or gene
 4. Informativity metric: UP or UPKB
+5. Min. patients/mutations: at least 2
+6. Min. mutations/patient: between 1 and 5
 
 Using these parameters, PIO will select an optimal set of mutations among the uploaded panel allowing to maximize informativity in a given disease. PIO will automatically suggest the most informative mutations to add to optimize panel informativity.
 
@@ -99,6 +108,8 @@ Using these parameters, PIO will select an optimal set of mutations among the up
 2. Parameters: PIO custom (do not forget to upload your custom panel below)
 3. Group mutation by: exon/intron is recommanded for panel size optimization.
 4. Informativity metric: UPKB is the most adapted metric for panel size optimization.
+5. Min. patients/mutations: at least 2
+6. Min. mutations/patient: between 1 and 5
 
 In this configuration, PIO will propose an optimized panel allowing to maximize informativity with for the minimal size. Different panels can be compared by manually uploading individual panels.
 
@@ -108,6 +119,8 @@ In this configuration, PIO will propose an optimized panel allowing to maximize 
 2. Parameters: Panel test (do not forget to upload your custom panel below)
 3. Group mutation by: according to the custom panel: gene or exon/intron
 4. Informativity metric: UP or UPKB
+5. Min. patients/mutations: 1
+6. Min. mutations/patient: between 1 and 5
 
 In this configuration, PIO will show the performances of the uploaded panel in a given dataset without further mutation selection/panel optimization.
 
@@ -118,6 +131,8 @@ In this configuration, PIO will show the performances of the uploaded panel in a
 2. Parameters: PIO optimal 
 3. Group mutation by: gene (or exon/intron)
 4. Informativity metric: UP or UPKB
+5. Min. patients/mutations: 1
+6. Min. mutations/patient: 1
 
 Using these parameters will optimize mutations exploration for a given disease in the mutations tab.
 

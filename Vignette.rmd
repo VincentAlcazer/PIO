@@ -72,7 +72,7 @@ Should mutations (and their respective length) be grouped by gene or exon/intron
 
 ### Informativity metric
 
-The metric used for panel optimization. PIO algorithm will rank mutations according to he number of unique patients (UP) or the number of unique patients per kilobase (UPKB). (default: UP)
+The metric used for panel optimization. PIO algorithm will rank mutations according to he number of unique patients (UP) or the number of unique patients per kilobase (UPKB). (default: UPKB)
 
 ### Min. patients/mutation
 

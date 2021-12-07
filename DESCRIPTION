@@ -1,6 +1,6 @@
 Package: PIO
 Title: Panel Informativity Optimizer
-Version: 1.0
+Version: 1.1
 Authors@R: 
     person(given = "Vincent",
            family = "Alcazer",
