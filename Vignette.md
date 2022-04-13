@@ -35,8 +35,9 @@ The training dataset can be selected here.
     where exons have not been annotated, exon_id will be an empty
     column).
 
-An example dataset is provided (Custom_dataset_example.tsv). Other
-example of datasets from cbioportal can be found in the
+An example dataset is provided
+([Custom_dataset_example.tsv](https://github.com/VincentAlcazer/PIO/blob/main/Custom_dataset_example.tsv)).
+Other example of datasets from cbioportal can be found in the
 raw_mutation_data folder.
 
 Note that preloaded datasets can be merged with custom datasets to
