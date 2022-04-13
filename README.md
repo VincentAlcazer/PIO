@@ -31,7 +31,7 @@ shiny::runApp("path_to_PIO")
 
 # Quick tutorial
 
-For a complete tutorial, please download the [vignette.](https://github.com/VincentAlcazer/PIO/blob/main/Vignette.html)
+For a complete tutorial, please visit the [vignette.](https://github.com/VincentAlcazer/PIO/blob/main/Vignette.md)
 
 ## Parameters overview
 

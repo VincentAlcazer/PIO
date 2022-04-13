@@ -2,6 +2,30 @@
 
 server <- function(input, output) {
 
+
+  shinyalert(
+    title = "Welcome to PIO v1.2!",
+    text = "
+    PIO is an open-source software created to help researchers and biologists in designing their NGS panels. <br><br>
+    <b>If you need help using PIO, you can check <a href = https://github.com/VincentAlcazer/PIO/blob/main/Vignette.md>PIO user guide</a>.</b> <br><br>
+    <b>If you found PIO useful please cite the original paper: <a href = https://www.jmdjournal.org/article/S1525-1578(22)00079-4/fulltext> Alcazer V. & Sujobert P. The Journal of Molecular Diagnostics 2022 (doi.org/10.1016/j.jmoldx.2022.03.005)</a>.</b>
+    ",
+    size = "s",
+    closeOnEsc = TRUE,
+    closeOnClickOutside = FALSE,
+    html = T,
+    type = "info",
+    showConfirmButton = TRUE,
+    showCancelButton = FALSE,
+    confirmButtonText = "OK",
+    confirmButtonCol = "#AEDEF4",
+    timer = 0,
+    imageUrl = "",
+    animation = TRUE
+  )
+
+
+
   ########## ========== DATAFRAME: Loading
 
   ##### ===== Load raw datasets

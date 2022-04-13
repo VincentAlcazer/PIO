@@ -1,6 +1,7 @@
 
 ui <- dashboardPage(
-  dashboardHeader(title = "PIO v1.1"),
+
+  dashboardHeader(title = "PIO v1.2"),
   dashboardSidebar(
     sidebarMenu(
       id = "tabs",
@@ -101,8 +102,9 @@ ui <- dashboardPage(
   ), # Side bar
   dashboardBody(
     fluidPage(
+      useShinyalert(force=T),
       useShinyjs(),
-      h2("Panel Informativity Optimizer v1.1"),
+      h2("Panel Informativity Optimizer v1.2"),
       column(
         9,
         tabsetPanel(
