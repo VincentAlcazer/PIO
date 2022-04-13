@@ -2,6 +2,7 @@
 ui <- dashboardPage(
 
   dashboardHeader(title = "PIO v1.2"),
+
   dashboardSidebar(
     sidebarMenu(
       id = "tabs",
@@ -104,7 +105,13 @@ ui <- dashboardPage(
     fluidPage(
       useShinyalert(force=T),
       useShinyjs(),
-      h2("Panel Informativity Optimizer v1.2"),
+ h2("Panel Informativity Optimizer v1.2"),
+  a("User guide",
+   href = "https://github.com/VincentAlcazer/PIO/blob/main/Vignette.md"),
+ br(),
+ a("Publication: Alcazer V. & Sujobert P. the Journal of Molecular Diagnostics 2022",
+   href = "https://www.jmdjournal.org/article/S1525-1578(22)00079-4/fulltext"),
+
       column(
         9,
         tabsetPanel(
