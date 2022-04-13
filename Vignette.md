@@ -38,7 +38,8 @@ The training dataset can be selected here.
 An example dataset is provided
 ([Custom_dataset_example.tsv](https://github.com/VincentAlcazer/PIO/blob/main/Custom_dataset_example.tsv)).
 Other example of datasets from cbioportal can be found in the
-raw_mutation_data folder.
+[raw_mutation_data
+folder](https://github.com/VincentAlcazer/PIO/tree/main/raw_mutation_data).
 
 Note that preloaded datasets can be merged with custom datasets to
 enable a global analysis on a larger base (can be done with a local use

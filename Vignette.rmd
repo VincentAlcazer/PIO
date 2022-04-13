@@ -57,7 +57,7 @@ The training dataset can be selected here.
 
 - **Custom datasets**: Custom mutation data can be uploaded by selecting browse and the correct file format. Custom datasets should contain at least the 10 following columns: "patient_id", "gene_id", "exon_id", "Chromosome", "Start_Position", "End_Position", "Strand", "Variant_Classification", "HGVSp", "cohort". Column names can differ but should be in the exact same position. Columns can be left empty in case the variable is not available (e.g. for a mutation dataset where exons have not been annotated, exon_id will be an empty column).
 
-An example dataset is provided ([Custom_dataset_example.tsv](https://github.com/VincentAlcazer/PIO/blob/main/Custom_dataset_example.tsv)). Other example of datasets from cbioportal can be found in the raw_mutation_data folder.
+An example dataset is provided ([Custom_dataset_example.tsv](https://github.com/VincentAlcazer/PIO/blob/main/Custom_dataset_example.tsv)). Other example of datasets from cbioportal can be found in the [raw_mutation_data folder](https://github.com/VincentAlcazer/PIO/tree/main/raw_mutation_data).
 
 Note that preloaded datasets can be merged with custom datasets to enable a global analysis on a larger base (can be done with a local use only).
 
